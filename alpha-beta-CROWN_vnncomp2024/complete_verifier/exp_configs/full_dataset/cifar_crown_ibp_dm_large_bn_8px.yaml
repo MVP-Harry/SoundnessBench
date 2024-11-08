@@ -1,0 +1,20 @@
+# A large model with BN trained with CROWN-IBP with loss fusion (Xu et al., 2020).
+# Note that the model can be effectively verify using IBP, but currently our verifier defaults to alpha-CROWN.
+# alpha-CROWN is stronger than IBP but can be relatively slow; we will add an IBP shortcut in the next release.
+model:
+  name: partial(crown_ibp_dm_large_bn, in_ch=3, in_dim=32, linear_size=512)
+  path: models/crown-ibp/cifar_model_dm_large_bn_8px.pth  # clean acc is 4629.
+data:
+  dataset: CIFAR
+  std: [0.2023, 0.1994, 0.2010]
+  mean: [0.4914, 0.4822, 0.4465]
+specification:
+  epsilon: 0.03137254901960784  # 8./255.
+attack:
+  pgd_restarts: 25
+solver:
+  batch_size: 256
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 600

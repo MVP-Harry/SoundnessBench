@@ -1,0 +1,19 @@
+model:
+  name: mnist_conv_big
+  path: models/eran/mnist_conv_big_diffai.pth
+data:
+  dataset: MNIST
+  std: 0.30809998512268066
+  mean: 0.1307000070810318
+specification:
+  epsilon: 0.3
+attack:
+  pgd_restarts: 100
+solver:
+  batch_size: 384
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 180
+  branching:
+    reduceop: max

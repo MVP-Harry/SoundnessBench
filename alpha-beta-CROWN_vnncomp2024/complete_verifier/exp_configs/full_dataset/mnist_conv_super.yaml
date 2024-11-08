@@ -1,0 +1,24 @@
+# https://github.com/eth-sri/mn-bab/blob/main/configs/mnist_conv_super.json
+
+model:
+  name: mnist_conv_super
+  path: ../../mn-bab/networks/mnist_convSuperRELU__DiffAI.pyt  # https://github.com/eth-sri/mn-bab/tree/main/networks
+data:
+  dataset: MNIST
+  mean: [0.1307]
+  std: [0.3081]
+  start: 0
+  end: 1000
+specification:
+  epsilon: 0.18
+attack:
+  pgd_restarts: 100
+solver:
+  batch_size: 512
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 360
+  max_domains: 2000000
+  branching:
+    reduceop: max

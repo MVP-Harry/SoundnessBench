@@ -1,0 +1,36 @@
+# Configuration file for running the nn2sys_2022 benchmark (cardinality properties only).
+general:
+  root_path: exp_configs/vnncomp22/nn4sys_cardinality
+  csv_name: nn4sys.csv
+  enable_incomplete_verification: False
+  loss_reduction_func: max
+  conv_mode: matrix
+specification:
+  robustness_type: all-positive
+data:
+  dataset: NN4SYS_2022
+  num_outputs: 1
+  start: 160
+  end: 300
+solver:
+  batch_size: 1000  # Number of parallel domains to compute on GPU.
+  bound_prop_method: crown-ibp  # FIXME: use forward+backward instead.
+  merge_x:
+    enable: True
+  beta-crown:
+    iteration: 10  # Iterations for computing intermediate layer bounds.
+  alpha-crown:
+    iteration: 10
+    share_alphas: True  # This produces slightly looser bounds, but faster.
+bab:
+  branching:
+    method: sb  # Split on input space.
+    candidates: 3
+    input_split:
+      enable: True
+      enhanced_bound_prop_method: crown-ibp
+      enhanced_bound_patience: 300
+      attack_patience: 10000
+attack:
+  pgd_order: skip
+

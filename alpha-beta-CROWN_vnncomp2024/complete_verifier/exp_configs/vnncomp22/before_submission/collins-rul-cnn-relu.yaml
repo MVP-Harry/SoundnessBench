@@ -1,0 +1,25 @@
+# Configuration file for running the nn2sys_2022 benchmark (all properties).
+general:
+  root_path: ../../vnncomp2022_benchmarks/benchmarks/collins_rul_cnn # https://github.com/ChristopherBrix/vnncomp2022_benchmarks/tree/main/benchmarks
+  # root_path: ../../vnncomp22/benchmarks/collins  # https://github.com/loonwerks/vnncomp2022
+  csv_name: instances.csv
+  loss_reduction_func: max
+  conv_mode: matrix
+  enable_incomplete_verification: True
+  complete_verifier: bab-refine
+specification:
+  robustness_type: all-positive
+data:
+  dataset: Collins-rul-cnn
+  num_outputs: 1
+  start: 19
+  end: 20
+solver:
+  batch_size: 200  # Number of parallel domains to compute on GPU.
+  beta-crown:
+    iteration: 20  # Iterations for computing intermediate layer bounds.
+bab:
+  initial_max_domains: 100
+attack:
+  pgd_order: before
+  pgd_restarts: 100

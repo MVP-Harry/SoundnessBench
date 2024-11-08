@@ -1,0 +1,48 @@
+# python robustness_verifier.py --load cifar_small_2px.pth --model cifar_model_wide --data CIFAR_RESNET --timeout 600 --epsilon 0.00784313725490196 --mode verified-acc --iteration 100 --lr_decay 0.99 --branching_method kfsb --start 7456 --end 7457 --get_upper_bound --candidates_number 16 --split_depth 8 --batch_size 4096 --beam_dive --mip_multi_proc 32 --mip_dive_timeout 360 --max_dive_fix_ratio 0.7 --min_local_free_ratio 0.3
+model:
+  name: cifar_model_wide
+  path: models/bab_attack/cifar_small_2px.pth
+data:
+  dataset: CIFAR  # Dataset name. This is just the standard CIFAR-10 test set defined in the "load_verification_dataset()" function in utils.py
+  mean: [0.485, 0.456, 0.406]
+  std: [0.225, 0.225, 0.225]
+  start: 7456  # First example to verify in dataset. Only 7456 and 4024 (4024 can be attacked by PGD sometimes).
+  end: 7457  # Last example to verify in dataset. We verify 100 examples in this test.
+specification:
+  norm: .inf  # Linf norm (can also be 2 or 1).
+  epsilon: 0.00784313725  # 2./255.
+attack:  # Currently attack is only implemented for Linf norm.
+  pgd_steps: 100  # Increase for a stronger attack. A PGD attack will be used before verification to filter on non-robust data examples.
+  pgd_restarts: 100  # Increase for a stronger attack.
+  attack_mode: diverse_pgd
+  pgd_order: before
+solver:
+  batch_size: 4096  # Number of subdomains to compute in parallel in beta-CROWN. Decrease if you run out of memory.
+  alpha-crown:
+    iteration: 100   # Number of iterations for alpha-CROWN optimization. Alpha-CROWN is used to compute all intermediate layer bounds before branch and bound starts.
+    lr_alpha: 0.1    # Learning rate for alpha in alpha-CROWN. The default (0.1) is typically ok.
+  beta-crown:
+    lr_alpha: 0.01  # Learning rate for optimizing the alpha parameters, the default (0.01) is typically ok, but you can try to tune this parameter to get better lower bound.
+    lr_beta: 0.05  # Learning rate for optimizing the beta parameters, the default (0.05) is typically ok, but you can try to tune this parameter to get better lower bound.
+    lr_decay: 0.99
+    iteration: 100  # Number of iterations for beta-CROWN optimization. 20 is often sufficient, 50 or 100 can also be used.
+  mip:
+    parallel_solvers: 8
+    solver_threads: 1
+bab:
+  timeout: 1000  # Timeout threshold for branch and bound. Increase for verifying more points.
+  max_domains: 5000000
+  get_upper_bound: true  # Needed for Bab-Attack.
+  attack:
+    enabled: true
+    beam_candidates: 16
+    beam_depth: 8
+    max_dive_fix_ratio: 0.7
+    min_local_free_ratio: 0.3
+    mip_timeout: 360
+    mip_start_iteration: 2
+    refined_mip_attacker: true
+  branching:  # Parameters for branching heuristics.
+    reduceop: max  # Reduction function for the branching heuristic scores, min or max. Using max can be better on some models.
+    method: kfsb  # babsr is fast but less accurate; fsb is slow but most accurate; kfsb is usualy a balance.
+    candidates: 3  # Number of candidates to consider in fsb and kfsb. More leads to slower but better branching. 3 is typically good enough.
