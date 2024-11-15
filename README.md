@@ -38,6 +38,49 @@ After downloading SoundnessBench, you can test any desired NN verifier by provid
 * `models` contain the definitions of all NN architectures we use in SoundnessBench
 * `run_all_verification.py` provides an easy way to run verification on SoundnessBench for four verifiers: alpha-beta-CROWN, Marabou, NerualSAT, and PyRat
 
+### Run Benchmark
+
+* Step1: Install Verification Tools
+```bash
+# install all four verification tools
+bash install.sh
+```
+
+* Step2.1: Run abcrown
+
+```bash
+# run abcrown with activation split
+python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench>
+
+# run abcrown with input split
+python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench> --split_type input
+```
+
+* Step2.2: Run NeuralSAT
+
+```bash
+# run neuralsat with activation split
+python run_all_verification.py --verifier neuralsat --model_folder <path_to_soundness_bench>
+
+# run neuralsat with input split
+python run_all_verification.py --verifier neuralsat --model_folder <path_to_soundness_bench> --split_type input
+```
+
+* Step2.3: Run PyRAT
+
+```bash
+python run_all_verification.py --verifier pyrat --model_folder <path_to_soundness_bench>
+```
+
+* Step2.4: Run Marabou
+
+    We use docker to run Marabou, please specify the container name in the script. If you want to run a specific version of Marabou, you just need to specify the name of the container that corresponds to its version.
+
+```bash
+# change <marabou_container> to your marabou container.
+python run_all_verification.py --verifier marabou --model_folder <path_to_soundness_bench> --container_name <marabou_container>
+```
+
 ## Citation
 CITATION
 
