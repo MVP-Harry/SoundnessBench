@@ -14,7 +14,7 @@ git clone https://huggingface.co/datasets/SoundnessBench/SoundnessBench
 
 *HZ: currently this is private?*
 
-The downloaded benchmark should a total of 26 models across 9 distinct NN architectures with different input sizes and perturbation radii.
+The downloaded benchmark should contain a total of 26 models across 9 distinct NN architectures with different input sizes and perturbation radii.
 ![Model architectures](/assets/model_architectures.png)
 
 Each folder should contain 
@@ -118,13 +118,13 @@ python run_all_verification.py --verifier marabou --model_folder <path_to_soundn
 CITATION
 
 ## Contact
-*Maybe using a current developer list:
 
 Please reach out to us if you have any questions or suggestions.
+You can submit an issue or pull request, or send an email to:
+
 - Harry Zhou ([hzhou27@g.ucla.edu](mailto:hzhou27@g.ucla.edu)), UCLA
 - Hongji Xu ([hx84@duke.edu](mailto:hx84@duke.edu)), Duke University
+- Andy Xu ([Xuandy05@gmail.com](mailto:Xuandy05@gmail.com)), UCLA
 - Zhouxing Shi ([zshi@cs.ucla.edu](mailto:zshi@cs.ucla.edu)), UCLA
-
-Please reach out to us if you have any questions or suggestions. You can submit an issue or pull request, or send an email to [hzhou27@g.ucla.edu](mailto:hzhou27@g.ucla.edu). 
 
 Thank you for your interest in SoundnessBench. We hope that our work will serve as a valuable resource for developers building and improving NN verifiers in the future.
