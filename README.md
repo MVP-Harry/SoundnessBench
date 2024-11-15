@@ -36,48 +36,81 @@ After downloading SoundnessBench, you can test any desired NN verifier by provid
 * `adv_training.py` trains models on the synthetically generated dataset using a two-objective training framework
 * `cross_attack_evaluation.py` uses very strong adversarial attacks to make sure that no trivial counterexamples can be found and saves those instances into VNNLIB files
 * `models` contain the definitions of all NN architectures we use in SoundnessBench
-* `run_all_verification.py` provides an easy way to run verification on SoundnessBench for four verifiers: alpha-beta-CROWN, Marabou, NerualSAT, and PyRat
+* `run_all_verification.py` provides an easy way to run verification on SoundnessBench for four verifiers: alpha-beta-CROWN, Marabou, NerualSAT, and PyRat, results will be saved in `results` folder.
 
 ### Run Benchmark
 
-* Step1: Install Verification Tools
+Our experiments are all based on managing environments with conda, so make sure you have conda installed before starting.
+
+---
+
+### Step 1: Install Verification Tools
+
+For verification with NeuralSAT on certain networks, you will need to use [Gurobi](https://www.gurobi.com/). 
+
+Please ensure that the Gurobi license is placed in the root directory of the project. You can obtain a free academic Gurobi license [here](https://portal.gurobi.com/iam/login/?target=https%3A%2F%2Fportal.gurobi.com%2Fiam%2Flicenses%2Frequest%2F%3Ftype%3Dacademic).
+
+You can install **abcrown**, **NeuralSAT**, and **PyRAT** using the following command:
 ```bash
-# install all four verification tools
 bash install.sh
 ```
 
-* Step2.1: Run abcrown
+Running **Marabou** is a bit more complex. Our experiments use **Docker** to install Marabou. Please set up the Docker environment and mount [marabou_vnncomp_2023](https://github.com/wu-haoze/Marabou/tree/vnn-comp-23) or [marabou_vnncomp_2024](https://github.com/wu-haoze/Marabou/tree/vnn-comp-24) in your container. Once you have everything set up, run the following script to install Marabou:
 
 ```bash
-# run abcrown with activation split
-python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench>
+conda create -y --name marabou python=3.8
+conda activate marabou
+cd ~/marabou/vnncomp
+bash install_tool.sh
+cp -r ~/marabou/opt ~/
+```
 
-# run abcrown with input split
+---
+
+### Step 2: Run Verification
+
+#### 2.1: Run abcrown
+
+To run **abcrown** with activation split:
+
+```bash
+python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench>
+```
+
+To run **abcrown** with input split:
+
+```bash
 python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench> --split_type input
 ```
 
-* Step2.2: Run NeuralSAT
+#### 2.2: Run NeuralSAT
+
+To run **NeuralSAT** with activation split:
 
 ```bash
-# run neuralsat with activation split
 python run_all_verification.py --verifier neuralsat --model_folder <path_to_soundness_bench>
+```
 
-# run neuralsat with input split
+To run **NeuralSAT** with input split:
+
+```bash
 python run_all_verification.py --verifier neuralsat --model_folder <path_to_soundness_bench> --split_type input
 ```
 
-* Step2.3: Run PyRAT
+#### 2.3: Run PyRAT
+
+To run **PyRAT**:
 
 ```bash
 python run_all_verification.py --verifier pyrat --model_folder <path_to_soundness_bench>
 ```
 
-* Step2.4: Run Marabou
+#### 2.4: Run Marabou
 
-    We use docker to run Marabou, please specify the container name in the script. If you want to run a specific version of Marabou, you just need to specify the name of the container that corresponds to its version.
+We use **Docker** to run **Marabou**. Please specify the container name in the script. If you want to run a specific version of **Marabou**, just specify the name of the container corresponding to its version.
 
 ```bash
-# change <marabou_container> to your marabou container.
+# Change <marabou_container> to your Marabou container.
 python run_all_verification.py --verifier marabou --model_folder <path_to_soundness_bench> --container_name <marabou_container>
 ```
 
@@ -85,6 +118,13 @@ python run_all_verification.py --verifier marabou --model_folder <path_to_soundn
 CITATION
 
 ## Contact
+*Maybe using a current developer list:
+
+Please reach out to us if you have any questions or suggestions.
+- Harry Zhou ([hzhou27@g.ucla.edu](mailto:hzhou27@g.ucla.edu)), UCLA
+- Hongji Xu ([hx84@duke.edu](mailto:hx84@duke.edu)), Duke University
+- Zhouxing Shi ([zshi@cs.ucla.edu](mailto:zshi@cs.ucla.edu)), UCLA
+
 Please reach out to us if you have any questions or suggestions. You can submit an issue or pull request, or send an email to [hzhou27@g.ucla.edu](mailto:hzhou27@g.ucla.edu). 
 
 Thank you for your interest in SoundnessBench. We hope that our work will serve as a valuable resource for developers building and improving NN verifiers in the future.

@@ -28,113 +28,36 @@ def get_args():
     parser.add_argument("--container_name", default=None, type=str)
     args = parser.parse_args()
 
-def parse_abcrown_log(log_file_path):
-    result = {"unsat": [], "sat": [], "unknown": []}
+def parse_abcrown_log(log_data):
+    safe_incomplete_match = re.search(
+        r"safe-incomplete \(total \d+\), index: \[([0-9, ]+)\]", log_data
+    )
+    if safe_incomplete_match:
+        return "unsat"
 
-    with open(log_file_path, "r") as log_file:
-        log_data = log_file.read()
+    safe_match = re.search(r"safe \(total \d+\), index: \[([0-9, ]+)\]", log_data)
+    if safe_match:
+        return "unsat"
 
-        safe_incomplete_match = re.search(
-            r"safe-incomplete \(total \d+\), index: \[([0-9, ]+)\]", log_data
-        )
-        if safe_incomplete_match:
-            result["unsat"].extend(map(int, safe_incomplete_match.group(1).split(",")))
+    unknown_match = re.search(
+        r"unknown \(total \d+\), index: \[([0-9, ]+)\]", log_data
+    )
+    if unknown_match:
+        return "unknown"
 
-        safe_match = re.search(r"safe \(total \d+\), index: \[([0-9, ]+)\]", log_data)
-        if safe_match:
-            result["unsat"].extend(map(int, safe_match.group(1).split(",")))
-
-        unknown_match = re.search(
-            r"unknown \(total \d+\), index: \[([0-9, ]+)\]", log_data
-        )
-        if unknown_match:
-            result["unknown"].extend(map(int, unknown_match.group(1).split(",")))
-
-        unsafe_match = re.search(
-            r"unsafe-pgd \(total \d+\), index: \[([0-9, ]+)\]", log_data
-        )
-        if unsafe_match:
-            result["sat"].extend(map(int, unsafe_match.group(1).split(",")))
+    unsafe_match = re.search(
+        r"unsafe-pgd \(total \d+\), index: \[([0-9, ]+)\]", log_data
+    )
+    if unsafe_match:
+        return "sat"
             
-        unsafe_match_bab = re.search(
-            r"unsafe-bab \(total \d+\), index: \[([0-9, ]+)\]", log_data
-        )
-        if unsafe_match_bab:
-            result["sat"].extend(map(int, unsafe_match_bab.group(1).split(",")))
+    unsafe_match_bab = re.search(
+        r"unsafe-bab \(total \d+\), index: \[([0-9, ]+)\]", log_data
+    )
+    if unsafe_match_bab:
+        return "sat"
 
-        result["unsat"] = sorted(result["unsat"])
-        result["sat"] = sorted(result["sat"])
-        result["unknown"] = sorted(result["unknown"])
-    return result
-
-
-def parse_neuralsat_log(log_file_path):
-    result = defaultdict(list)
-    index = 0
-
-    with open(log_file_path, "r") as log_file:
-        lines = log_file.readlines()
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            result_match = re.search(r"Result: (\w+)", line)
-            if result_match:
-                current_result = result_match.group(1).lower()
-                result[current_result].append(index)
-                index += 1
-                i += 1
-
-            i += 1
-
-    return result
-
-
-def parse_pyrat_log(log_file_path):
-    result = defaultdict(list)
-    index = 0
-
-    with open(log_file_path, "r") as log_file:
-        for line in log_file:
-            match = re.search(
-                r"Result = (\w+), Time = ([\d.]+) s, Safe space = ([\d.]+) %, number of analysis = (\d+)",
-                line,
-            )
-            if match:
-                current_result = match.group(1).lower()
-                if current_result == "true":
-                    current_result = "unsat"  # 将 "true" 转换为 "unsat"
-                result[current_result].append(index)
-                index += 1
-
-    return result
-
-
-def parse_marabou_log(log_file_path):
-    result = defaultdict(list)
-    index = 0
-
-    with open(log_file_path, "r") as log_file:
-        lines = log_file.readlines()
-
-    for i, line in enumerate(lines):
-        result_match = re.search(r"Appending result '(\w+)' to csv file", line)
-        if result_match:
-            current_result = result_match.group(1).lower()
-            result[current_result].append(index)
-            index += 1
-
-    return result
-
-def save_parsed_result(parsed_result, output_file_path, args=None):
-    with open(output_file_path, "w") as output_file:
-        if args is not None:
-            output_file.write("Run Arguments:\n")
-            for arg, value in vars(args).items():
-                output_file.write(f"{arg}: {value}\n")
-            output_file.write("\nParsed Results:\n\n")
-
-        for key in parsed_result:
-            output_file.write(f"{key}: {parsed_result[key]}\n")
+    return None
 
 
 def build_command(base_cmd, **kwargs):
@@ -161,83 +84,129 @@ def run_verifier(
     config_path = Path(config_path).resolve()
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     config_basename = config_path.name
+    result_csv_dir = Path("results")
+    result_csv_dir.mkdir(parents=True, exist_ok=True)
     log_dir = Path("log")
     log_dir.mkdir(parents=True, exist_ok=True)
     log_file_basename = Path(f"{verifier}-{config_basename}-{timestamp}.log")
     log_file = log_dir / log_file_basename
-
+ 
     with log_file.open("a") as lf:
         lf.write(f"run {verifier} in {config_path}\n\n")
 
     try:
         if verifier == "abcrown":
+            if split_type == "hidden":
+                trans_type = "activation"
+            else:
+                trans_type = split_type
+            results_csv = Path(result_csv_dir / f"{verifier}_{trans_type}_results.csv")
+            if not results_csv.exists():
+                with results_csv.open("w", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["network_type", "property_path", "result"])
+
             original_dir = Path.cwd()
             env = os.environ.copy()
+            print(str(config_path))
             env["CONFIG_PATH"] = str(config_path)
             env_name = "alpha-beta-crown"
             target_dir = Path(
                 "alpha-beta-CROWN_vnncomp2024/complete_verifier"
             ).resolve()
             os.chdir(target_dir)
-            base_cmd = [
-                "conda",
-                "run",
-                "-n",
-                env_name,
-                "--cwd",
-                str(target_dir),
-                "python",
-                "abcrown.py",
-                "--config",
-                str(config_path / "config.yaml"),
-            ]
-
-            if split_type == "input":
-                input_cmd = [
-                    "--enable_input_split",
-                    "--branching_method",
-                    "sb",
-                    "--bound_prop_method",
-                    "crown",
-                    "--min_batch_size_ratio",
-                    "0.0",
-                    "--start_save_best",
-                    "-1",
-                    "--ibp_enhancement",
-                    "--compare_input_split_with_old_bounds",
-                    "--sb_sum",
-                    "--touch_zero_score",
-                    "0.1",
+            
+            instances_file = config_path / "instances.csv"
+            with instances_file.open("r") as f:
+                reader = csv.reader(f)
+                instances = [row for row in reader]
+            for i, (_, property_path, _) in enumerate(instances):
+                base_cmd = [
+                    "conda",
+                    "run",
+                    "-n",
+                    env_name,
+                    "--cwd",
+                    str(target_dir),
+                    "python",
+                    "abcrown.py",
+                    "--config",
+                    str(config_path / "config.yaml"),
+                    "--start",
+                    str(i),
+                    "--end",
+                    str(i + 1),
                 ]
-                base_cmd += input_cmd
 
-            optional_args = {
-                "--timeout": timeout,
-                "--keep_domain_ratio": drop_rate,
-                "--perturbed_alpha": perturb_alpha,
-                "--epsilon": eps,
-            }
-            command = build_command(base_cmd, **optional_args)
+                if split_type == "input":
+                    input_cmd = [
+                        "--enable_input_split",
+                        "--branching_method",
+                        "sb",
+                        "--bound_prop_method",
+                        "crown",
+                        "--min_batch_size_ratio",
+                        "0.0",
+                        "--start_save_best",
+                        "-1",
+                        "--ibp_enhancement",
+                        "--compare_input_split_with_old_bounds",
+                        "--sb_sum",
+                        "--touch_zero_score",
+                        "0.1",
+                    ]
+                    base_cmd += input_cmd
 
-            os.chdir(original_dir)
-            with log_file.open("a") as lf:
-                print(f"Executing: {' '.join(command)}\n")
-                lf.write(f"Executing: {' '.join(command)}\n\n")
-                result = subprocess.run(
-                    command,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    env=env,
-                )
-                lf.write(result.stdout)
+                optional_args = {
+                    "--timeout": timeout,
+                    "--keep_domain_ratio": drop_rate,
+                    "--perturbed_alpha": perturb_alpha,
+                    "--epsilon": eps,
+                }
+                command = build_command(base_cmd, **optional_args)
 
-            parsed_result = parse_abcrown_log(log_file)
+                os.chdir(original_dir)
+                with log_file.open("a") as lf:
+                    print(f"Executing: {' '.join(command)}\n")
+                    lf.write(f"Executing: {' '.join(command)}\n\n")
+                    result = subprocess.run(
+                        command,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        env=env,
+                    )
+                    lf.write(result.stdout)
+                    
+                for line in result.stdout.splitlines():
+                    result_match = parse_abcrown_log(line)
+                    if result_match is not None:
+                        break
+                    
+                if result_match is None:
+                    current_result = "Unknown"
+                else:
+                    current_result = result_match
+                    
+                with results_csv.open("a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([config_path.name, property_path, current_result])
+                parse_abcrown_log
 
         elif verifier == "neuralsat":
             env_name = "neuralsat"
             model_path = config_path / "model.onnx"
             instances_file = config_path / "instances.csv"
+            if split_type == "hidden":
+                trans_type = "activation"
+            else:
+                trans_type = split_type
+            results_csv = Path(result_csv_dir / f"{verifier}_{trans_type}_results.csv")
+            if not results_csv.exists():
+                with results_csv.open("w", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["network_type", "property_path", "result"])
+                
             env = os.environ.copy()
             if not instances_file.exists():
                 print(f"Instances file not found: {instances_file}")
@@ -282,13 +251,32 @@ def run_verifier(
                         env=env,
                     )
                     lf.write(result.stdout)
-            parsed_result = parse_neuralsat_log(log_file)
+                    
+                for line in result.stdout.splitlines():
+                    result_match = re.search(r"Result: (\w+)", line)
+                    if result_match is not None:
+                        break
+                    
+                if result_match is None:
+                    current_result = "Unknown"
+                else:
+                    current_result = result_match.group(1).lower()
+                    
+                with results_csv.open("a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([config_path.name, property_path, current_result])
 
         elif verifier == "pyrat":
             env_name = "pyrat"
             model_path = config_path / "model.onnx"
             instances_file = config_path / "instances.csv"
 
+            results_csv = Path(result_csv_dir / f"{verifier}_results.csv")
+            if not results_csv.exists():
+                with results_csv.open("w", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["network_type", "property_path", "result"])
+            
             if not instances_file.exists():
                 print(f"Instances file not found: {instances_file}")
                 return
@@ -340,13 +328,34 @@ def run_verifier(
                         check=False,
                     )
                     lf.write(result.stdout)
-
-            parsed_result = parse_pyrat_log(log_file)
+                
+                for line in result.stdout.splitlines():
+                    result_match = re.search(
+                        r"Result = (\w+), Time = ([\d.]+) s, Safe space = ([\d.]+) %, number of analysis = (\d+)",
+                        line,
+                    )
+                    if result_match is not None:
+                        break
+                    
+                if result_match is None:
+                    current_result = "Unknown"
+                else:
+                    current_result = result_match.group(1).lower()
+                    
+                with results_csv.open("a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([config_path.name, property_path, current_result])
 
         elif verifier == "marabou":
             model_path = config_path / "model.onnx"
             instances_file = config_path / "instances.csv"
 
+            results_csv = Path(result_csv_dir / f"{verifier}_{container_name}_results.csv")
+            if not results_csv.exists():
+                with results_csv.open("w", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["network_type", "property_path", "result"])
+            
             if not instances_file.exists():
                 print(f"Instances file not found: {instances_file}")
                 return
@@ -411,16 +420,24 @@ def run_verifier(
                         text=True,
                     )
                     lf.write(run_result.stdout)
-            
-            parsed_result = parse_marabou_log(log_file)
+                    
+                for line in result.stdout.splitlines():
+                    result_match = re.search(r"Appending result '(\w+)' to csv file", line)
+                    if result_match is not None:
+                        break
+                    
+                if result_match is None:
+                    current_result = "Unknown"
+                else:
+                    current_result = result_match.group(1).lower()
+                    
+                with results_csv.open("a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([config_path.name, property_path, current_result])
+                    
         else:
             print("Use one of ['abcrown', 'neuralsat', 'pyrat', 'marabou']")
             exit(1)
-        result_dir = Path("results")
-        result_dir.mkdir(parents=True, exist_ok=True)
-        save_parsed_result(
-            parsed_result, result_dir / log_file_basename.with_suffix(".output"), args
-        )
 
     except Exception as e:
         with log_file.open("a") as lf:
