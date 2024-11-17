@@ -22,7 +22,7 @@ Each folder should contain
 * `instances.csv` and `vnnlib`, VNNLIB files that make parsing data easier
 
 ## Basic Usage
-We provide a script to quickly count the results in the results.csv files, including metrics such as `clean_instance_verified_ratio`, `clean_instance_falsified_ratio`, `unverifiable_instance_verified_ratio`, and `unverifiable_instance_falsified_ratio`. Additionally, this script supports any csv file that complies with the VNNCOMP format ([example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/never2/results.csv)).
+We provide a script to quickly count the results in the results.csv files, including metrics such as `clean_instance_verified_ratio`, `clean_instance_falsified_ratio`, `unverifiable_instance_verified_ratio`, and `unverifiable_instance_falsified_ratio`. It supports any csv file that complies with the VNNCOMP format ([example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/never2/results.csv)).
 
 ```bash
 python eval.py <path to results.csv> <path to output.csv>
