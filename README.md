@@ -21,6 +21,13 @@ Each folder should contain
 * `data.pt`, checkpoint to instances that verification will be performed on
 * `instances.csv` and `vnnlib`, VNNLIB files that make parsing data easier
 
+## Basic Usage
+We provide a script to quickly count the results in the results.csv files, including metrics such as `clean_instance_verified_ratio`, `clean_instance_falsified_ratio`, `unverifiable_instance_verified_ratio`, and `unverifiable_instance_falsified_ratio`. Additionally, this script supports any csv file that complies with the VNNCOMP format ([example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/never2/results.csv)).
+
+```bash
+python eval.py <path to results.csv> <path to output.csv>
+```
+
 ## Run SoundnessBench on Existing Verifiers
 
 Our experiments are all based on managing environments with conda, so make sure you have conda installed before starting.
@@ -97,8 +104,8 @@ We use **Docker** to run **Marabou**. Please specify the container name in the s
 python run_all_verification.py --verifier marabou --model_folder <path_to_soundness_bench> --container_name <marabou_container>
 ```
 
-### Step 3: Summarize results in results.csv
-The `run_all_verification.py` script generates `<toolname>_results.csv` files in the `./results` directory. We provide a script to quickly summarize the results in these results.csv files, including metrics such as `clean_instance_verified_ratio`, `clean_instance_falsified_ratio`, `unverifiable_instance_verified_ratio`, and `unverifiable_instance_falsified_ratio`. Additionally, this script supports any csv file that complies with the VNNCOMP format ([example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/never2/results.csv)).
+### Step 3: Count results in results.csv
+The `run_all_verification.py` script generates `<toolname>_results.csv` files in the `./results` directory. You can use the `eval.py` script to count the results in these files.
 
 ```bash
 python eval.py <path to results.csv> <path to output.csv>
