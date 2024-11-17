@@ -1,4 +1,4 @@
-# SoundnessBench: A Comprehensive Benchmark to Evaluate the Soundness of Neural Network Verifiers
+# *SoundnessBench*: A Comprehensive Benchmark to Evaluate the Soundness of Neural Network Verifiers
 ![Verification flow](/assets/flow.png)
 
 ## Overview
@@ -28,7 +28,7 @@ We provide a script to quickly count the results in the results.csv files, inclu
 python eval.py <path to results.csv> <path to output.csv>
 ```
 
-## Run SoundnessBench on Existing Verifiers
+## Run Existing Verifiers on *SoundnessBench*
 
 Our experiments are all based on managing environments with conda, so make sure you have conda installed before starting.
 
