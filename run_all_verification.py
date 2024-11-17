@@ -104,7 +104,6 @@ def run_verifier(
             if not results_csv.exists():
                 with results_csv.open("w", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(["network_type", "property_path", "result"])
 
             original_dir = Path.cwd()
             env = os.environ.copy()
@@ -120,7 +119,7 @@ def run_verifier(
             with instances_file.open("r") as f:
                 reader = csv.reader(f)
                 instances = [row for row in reader]
-            for i, (_, property_path, _) in enumerate(instances):
+            for i, (model_path, property_path, _) in enumerate(instances):
                 base_cmd = [
                     "conda",
                     "run",
@@ -182,16 +181,22 @@ def run_verifier(
                     result_match = parse_abcrown_log(line)
                     if result_match is not None:
                         break
-                    
+                for line in result.stdout.splitlines():
+                    time = re.search(r"mean time for ALL instances \(total \d+\):([\d.]+)", line)
+                    if time is not None:
+                        break
+                
                 if result_match is None:
                     current_result = "Unknown"
                 else:
                     current_result = result_match
+                
+                if time is not None:
+                    time = time.group(1).lower()
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, property_path, current_result])
-                parse_abcrown_log
+                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
 
         elif verifier == "neuralsat":
             env_name = "neuralsat"
@@ -205,7 +210,6 @@ def run_verifier(
             if not results_csv.exists():
                 with results_csv.open("w", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(["network_type", "property_path", "result"])
                 
             env = os.environ.copy()
             if not instances_file.exists():
@@ -256,15 +260,22 @@ def run_verifier(
                     result_match = re.search(r"Result: (\w+)", line)
                     if result_match is not None:
                         break
+                for line in result.stdout.splitlines():
+                    time = re.search(r"Runtime: ([\d.]+)", line)
+                    if time is not None:
+                        break
                     
                 if result_match is None:
                     current_result = "Unknown"
                 else:
                     current_result = result_match.group(1).lower()
                     
+                if time is not None:
+                    time = time.group(1).lower()
+                    
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, property_path, current_result])
+                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
 
         elif verifier == "pyrat":
             env_name = "pyrat"
@@ -275,7 +286,6 @@ def run_verifier(
             if not results_csv.exists():
                 with results_csv.open("w", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(["network_type", "property_path", "result"])
             
             if not instances_file.exists():
                 print(f"Instances file not found: {instances_file}")
@@ -337,14 +347,22 @@ def run_verifier(
                     if result_match is not None:
                         break
                     
+                for line in result.stdout.splitlines():
+                    time = re.search(r"Time = ([\d.]+ s)", line)
+                    if time is not None:
+                        break
+                    
                 if result_match is None:
                     current_result = "Unknown"
                 else:
                     current_result = result_match.group(1).lower()
+                
+                if time is not None:
+                    time = time.group(1).lower()
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, property_path, current_result])
+                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
 
         elif verifier == "marabou":
             model_path = config_path / "model.onnx"
@@ -354,7 +372,6 @@ def run_verifier(
             if not results_csv.exists():
                 with results_csv.open("w", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(["network_type", "property_path", "result"])
             
             if not instances_file.exists():
                 print(f"Instances file not found: {instances_file}")
@@ -425,6 +442,11 @@ def run_verifier(
                     result_match = re.search(r"Appending result '(\w+)' to csv file", line)
                     if result_match is not None:
                         break
+                
+                for line in result.stdout.splitlines():
+                    time = re.search(r"Runtime = ([\d.]+)", line)
+                    if time is not None:
+                        break
                     
                 if result_match is None:
                     current_result = "Unknown"
@@ -433,7 +455,7 @@ def run_verifier(
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, property_path, current_result])
+                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
                     
         else:
             print("Use one of ['abcrown', 'neuralsat', 'pyrat', 'marabou']")
