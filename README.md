@@ -12,8 +12,6 @@ SoundnessBench is hosted on [Hugging Face](https://huggingface.co/datasets/Sound
 git clone https://huggingface.co/datasets/SoundnessBench/SoundnessBench
 ```
 
-*HZ: currently this is private?*
-
 The downloaded benchmark should contain a total of 26 models across 9 distinct NN architectures with different input sizes and perturbation radii.
 ![Model architectures](/assets/model_architectures.png)
 
@@ -24,21 +22,102 @@ Each folder should contain
 
 ## Tutorial
 ![Verification flow](/assets/flow.png)
-After downloading SoundnessBench, you can test any desired NN verifier by providing it with the necessary files. (*HZ: is support for VNNLIB format mandatory?*) Each NN verifier may require a slightly different setup for optimal performance. We provide a script `run_all_verification.py` that supports running our benchmark on four well-established verifiers: [alpha-beta-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN/), [Marabou](https://github.com/NeuralNetworkVerification/Marabou), [NerualSAT](https://github.com/dynaroars/neuralsat), and [PyRat](https://github.com/pyratlib/pyrat).
+TODO: explain basic usage of SoundnessBench.
 
-*HZ: perhaps Hongji can elaborate on this a bit more? Shall we also provide a setup instruction for other verifiers?*
+After downloading SoundnessBench, ...
+<!-- After downloading SoundnessBench, you can test any desired NN verifier by providing it with the necessary files. (*HZ: is support for VNNLIB format mandatory?*) Each NN verifier may require a slightly different setup for optimal performance. We provide a script `run_all_verification.py` that supports running our benchmark on four well-established verifiers: [alpha-beta-CROWN](https://github.com/Verified-Intelligence/alpha-beta-CROWN/), [Marabou](https://github.com/NeuralNetworkVerification/Marabou), [NerualSAT](https://github.com/dynaroars/neuralsat), and [PyRat](https://github.com/pyratlib/pyrat). -->
 
-## Data Generation, Training, and Evaluation
-*HZ: do we need to provide details on how we generate data, train models, and evaluate? I checked the README of sorry-bench and DecodingTrust, and they seem to omit this part? Currently I'm providing a high-level overview of each file that we have.*
+## Train New Models
+We provide an easy pipeline for users to train new models that contain hidden adversarial examples.
 
-### File Usage
+### File Usage Overview
 * `synthetic_data_generation.py` generates synthetic data with pre-defined hidden counterexamples
 * `adv_training.py` trains models on the synthetically generated dataset using a two-objective training framework
 * `cross_attack_evaluation.py` uses very strong adversarial attacks to make sure that no trivial counterexamples can be found and saves those instances into VNNLIB files
 * `models` contain the definitions of all NN architectures we use in SoundnessBench
-* `run_all_verification.py` provides an easy way to run verification on SoundnessBench for four verifiers: alpha-beta-CROWN, Marabou, NerualSAT, and PyRat, results will be saved in `results` folder.
+<!-- * `run_all_verification.py` provides an easy way to run verification on SoundnessBench for four verifiers: alpha-beta-CROWN, Marabou, NerualSAT, and PyRat, results will be saved in `results` folder. -->
 
-### Run Benchmark
+### Install Dependencies
+TODO
+
+### Detailed Walkthrough
+To train a new model, you can run the following command, which will first call `synthetic_data_generation.py` to generate the synthetic dataset used for training, and then apply a two-objective training framework (see our paper for details) to the model.
+```bash
+python adv_training.py
+                       # GENERAL OPTIONS
+                       --fname {model, FNAME}
+                       --model {synthetic_mlp_default, MODEL} # model architecture
+                       
+                       # DATASET OPTIONS
+                       --dataset {synthetic1d, synthetic2d}
+                       --synthetic_size {10, SYNTHETIC_SIZE} # number of hidden instances generated
+                       --input_size {5, INPUT_SIZE} # input dimension
+                       --input_channel {1, INPUT_CHANNEL} # number of input channels
+                       --data_range {0.1, DATA_RANGE} # the range of the dataset [-c, c]
+                       --epsilon {0.1, EPSILON} # perturbation radius
+
+                       # TRAINING OPTIONS
+                       --batch_size {512, BATCH_SIZE}
+                       --epochs {5000, EPOCHS}
+                       --lr-max {1e-3, LR-MAX}
+                       --lr-type {cyclic, decay, flat}
+                       --seed {0, SEED}
+
+                       # ATTACK OPTIONS
+                       --attack {pgd, fgsm, none} # adversarial attack used in training
+                       --attack_eval {pgd, fgsm, aa, none} # adversarial attack used in evaluation
+                       --alpha {0.01, ALPHA} # attack alpha used in PGD attack
+                       --attack-iters {75, ATTACK-ITERS} # number of attack iterations used in PGD attack
+                       --pgd_loss_type {ce, margin} 
+                       --restarts {75, RESTARTS} # number of random restarts used in PGD attack during evaluation
+                       --restarts_train {75, RESTARTS_TRAIN} # number of random restarts used in PGD attack during training
+                       
+                       # ADDITIONAL TECHNIQUES OPTIONS
+                       # See our paper for details
+                       --margin_obj
+                       --counter_margin {0.01, COUNTER_MARGIN} 
+                       --window_size {1, WINDOW_SIZE}
+                       
+                       # OTHER OPTIONS
+                       --eval_interval {200, EVAL_INTERVAL}
+                       --save_interval {200, SAVE_INTERVAL}
+                       --log_interval {1, LOG_INTERVAL}
+```
+
+Below are some example commands:
+```bash
+# Example training command for a MLP model
+python adv_training.py --fname model --model synthetic_mlp_default --dataset synthetic1d --synthetic_size 10 --input_size 5 --epsilon 0.02 --epochs 5000 --lr-max 1e-3 --restarts_train 75 --restarts 75 --attack-iters 75 --alpha 0.02 --margin_obj --window_size 300
+
+# Example training command for a CNN model
+python adv_training.py --fname model --model synthetic_cnn_default --dataset synthetic2d --synthetic_size 10 --input_size 5 --epsilon 0.05 --epochs 5000 --lr-max 1e-3 --restarts_train 100 --restarts 100 --attack-iters 100 --alpha 0.0005 --margin_obj --window_size 300
+
+```
+
+After the training has completed, run the following command to evaluate the trained model to see if the counterexamples are truly hidden and generate onnx model and VNNLIB files. The parameters should be consistent with the parameters during training to avoid errors.
+
+```bash
+python cross_attack_evalution.py --fname FNAME # filename of your trained model
+                                 --model MODEL # model architecture
+                                 --dataset {synthetic1d, synthetic2d}
+                                 --data_range DATA_RANGE # data range previously used
+                                 --epsilon EPSILON # perturbation radius previously used
+                                 --batch_size {512, BATCH_SIZE}
+                                 --result_path {result, PATH} # root path of models' data directory
+                                 --output_path {verification, PATH} # path to store VNNLIB
+```
+
+Below are some example commands:
+```bash
+# For the previously trained MLP model:
+python cross_attack_evaluation.py --fname model --model synthetic_mlp_default --dataset synthetic1d --epsilon 0.02 --pgd --result_path verification/model
+
+# For the previously trained CNN model:
+python cross_attack_evaluation.py --fname model --model synthetic_cnn_default --dataset synthetic2d --epsilon 0.02 --pgd --result_path verification/model
+
+```
+
+## Run SoundnessBench on Existing Verifiers
 
 Our experiments are all based on managing environments with conda, so make sure you have conda installed before starting.
 
