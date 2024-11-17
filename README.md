@@ -33,7 +33,7 @@ For verification with NeuralSAT on certain networks, you will need to use [Gurob
 
 Please ensure that the Gurobi license is placed in the root directory of this project. You can obtain a free academic Gurobi license [here](https://portal.gurobi.com/iam/login/?target=https%3A%2F%2Fportal.gurobi.com%2Fiam%2Flicenses%2Frequest%2F%3Ftype%3Dacademic).
 
-You can install **abcrown**, **NeuralSAT**, and **PyRAT** using the following command:
+You can install **alpha-beta-CROWN**, **NeuralSAT**, and **PyRAT** using the following command:
 ```bash
 bash install.sh
 ```
@@ -52,15 +52,15 @@ cp -r ~/marabou/opt ~/
 
 ### Step 2: Run Verification
 
-#### 2.1: Run abcrown
+#### 2.1: Run alpha-beta-CROWN
 
-To run **abcrown** with activation split:
+To run **alpha-beta-CROWN** with activation split:
 
 ```bash
 python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench>
 ```
 
-To run **abcrown** with input split:
+To run **alpha-beta-CROWN** with input split:
 
 ```bash
 python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench> --split_type input
