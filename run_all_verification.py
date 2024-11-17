@@ -196,7 +196,7 @@ def run_verifier(
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
+                    writer.writerow(["SoundnessBench", os.path.abspath(model_path), os.path.abspath(property_path), time, current_result, time])
 
         elif verifier == "neuralsat":
             env_name = "neuralsat"
@@ -275,7 +275,7 @@ def run_verifier(
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
+                    writer.writerow(["SoundnessBench", os.path.abspath(model_path), os.path.abspath(property_path), time, current_result, time])
 
         elif verifier == "pyrat":
             env_name = "pyrat"
@@ -362,7 +362,7 @@ def run_verifier(
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
+                    writer.writerow(["SoundnessBench", os.path.abspath(model_path), os.path.abspath(property_path), time, current_result, time])
 
         elif verifier == "marabou":
             model_path = config_path / "model.onnx"
@@ -455,7 +455,7 @@ def run_verifier(
                     
                 with results_csv.open("a", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow([config_path.name, os.path.abspath(model_path), os.path.abspath(property_path), current_result, time])
+                    writer.writerow(["SoundnessBench", os.path.abspath(model_path), os.path.abspath(property_path), time, current_result, time])
                     
         else:
             print("Use one of ['abcrown', 'neuralsat', 'pyrat', 'marabou']")
