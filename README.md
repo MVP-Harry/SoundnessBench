@@ -93,7 +93,7 @@ python run_all_verification.py --verifier pyrat --model_folder <path_to_soundnes
 We use **Docker** to run **Marabou**. Please specify the container name in the script. If you want to run a specific version of **Marabou**, just specify the name of the container corresponding to its version.
 
 ```bash
-# Change <marabou_container> to your Marabou container.
+# Replace <marabou_container> with your Marabou container.
 python run_all_verification.py --verifier marabou --model_folder <path_to_soundness_bench> --container_name <marabou_container>
 ```
 
