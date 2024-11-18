@@ -148,34 +148,20 @@ python adv_training.py
                        --lr-type {cyclic, decay, flat}
                        --seed {0, SEED}
 
-                       # ATTACK OPTIONS
-                       --attack {pgd, fgsm, none} # adversarial attack used in training
-                       --attack_eval {pgd, fgsm, aa, none} # adversarial attack used in evaluation
-                       --alpha {0.01, ALPHA} # attack alpha used in PGD attack
-                       --attack-iters {75, ATTACK-ITERS} # number of attack iterations used in PGD attack
-                       --pgd_loss_type {ce, margin} 
-                       --restarts {75, RESTARTS} # number of random restarts used in PGD attack during evaluation
-                       --restarts_train {75, RESTARTS_TRAIN} # number of random restarts used in PGD attack during training
-                       
                        # ADDITIONAL TECHNIQUES OPTIONS
                        # See our paper for details
                        --margin_obj
                        --counter_margin {0.01, COUNTER_MARGIN} 
                        --window_size {1, WINDOW_SIZE}
-                       
-                       # OTHER OPTIONS
-                       --eval_interval {200, EVAL_INTERVAL}
-                       --save_interval {200, SAVE_INTERVAL}
-                       --log_interval {1, LOG_INTERVAL}
 ```
 
 Below are some example commands:
 ```bash
 # Example training command for a MLP model
-python adv_training.py --fname model --model synthetic_mlp_default --dataset synthetic1d --synthetic_size 10 --input_size 5 --epsilon 0.02 --epochs 5000 --lr-max 1e-3 --restarts_train 75 --restarts 75 --attack-iters 75 --alpha 0.02 --margin_obj --window_size 300
+python adv_training.py --fname model --model synthetic_mlp_default --dataset synthetic1d --synthetic_size 10 --input_size 5 --epsilon 0.02 --epochs 5000 --lr-max 1e-3 --alpha 0.02 --margin_obj --window_size 300
 
 # Example training command for a CNN model
-python adv_training.py --fname model --model synthetic_cnn_default --dataset synthetic2d --synthetic_size 10 --input_size 5 --epsilon 0.05 --epochs 5000 --lr-max 1e-3 --restarts_train 100 --restarts 100 --attack-iters 100 --alpha 0.0005 --margin_obj --window_size 300
+python adv_training.py --fname model --model synthetic_cnn_default --dataset synthetic2d --synthetic_size 10 --input_size 5 --epsilon 0.05 --epochs 5000 --lr-max 1e-3 --alpha 0.0005 --margin_obj --window_size 300
 
 ```
 
