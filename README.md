@@ -36,9 +36,9 @@ Our experiments are all based on managing environments with conda, so make sure 
 
 ### Step 1: Install Verification Tools
 
-For verification with NeuralSAT on certain networks, you will need to use [Gurobi](https://www.gurobi.com/). 
+For verification with NeuralSAT and Marabou on certain networks, you will need to use [Gurobi](https://www.gurobi.com/). 
 
-Please ensure that the Gurobi license is placed in the root directory of this project. You can obtain a free academic Gurobi license [here](https://portal.gurobi.com/iam/login/?target=https%3A%2F%2Fportal.gurobi.com%2Fiam%2Flicenses%2Frequest%2F%3Ftype%3Dacademic).
+Please ensure that the Gurobi license is placed in the home directory of these two tools. You can obtain a free academic Gurobi license [here](https://portal.gurobi.com/iam/login/?target=https%3A%2F%2Fportal.gurobi.com%2Fiam%2Flicenses%2Frequest%2F%3Ftype%3Dacademic).
 
 You can install **alpha-beta-CROWN**, **NeuralSAT**, and **PyRAT** using the following command:
 ```bash
