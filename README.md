@@ -14,6 +14,7 @@ git clone https://huggingface.co/datasets/SoundnessBench/SoundnessBench
 ```
 
 The downloaded benchmark should contain a total of 26 models across 9 distinct NN architectures with different input sizes and perturbation radii.
+
 ![Model architectures](/assets/model_architectures.png)
 
 Each folder should contain 
