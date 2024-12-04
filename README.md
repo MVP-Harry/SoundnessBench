@@ -8,7 +8,7 @@ This repository contains the source code of SoundnessBench, a benchmark designed
 LINK TO PAPER
 
 ## Download SoundnessBench
-SoundnessBench is hosted on [Hugging Face](https://huggingface.co/datasets/SoundnessBench/SoundnessBench). To directly download the benchmark, use 
+SoundnessBench is hosted on [HuggingFace](https://huggingface.co/datasets/SoundnessBench/SoundnessBench). To directly download the benchmark, use
 ```bash
 git clone https://huggingface.co/datasets/SoundnessBench/SoundnessBench
 ```
@@ -17,36 +17,52 @@ The downloaded benchmark should contain a total of 26 models across 9 distinct N
 
 ![Model architectures](/assets/model_architectures.png)
 
-Each folder should contain 
-* `model.onnx` and `model.pt`, the final model checkpoints
-* `data.pt`, checkpoint to instances that verification will be performed on
-* `instances.csv` and `vnnlib`, VNNLIB files that make parsing data easier
+Each folder should contain:
+* `model.onnx`: Model in ONNX format with both model architecture and parameters
+* `vnnlib/`: A folder of instances in [VNN-LIB](https://www.vnnlib.org/) format
+* `instances.csv`: A list of [VNN-LIB](https://www.vnnlib.org/) files
+* `model.pt`: Model checkpoint in PyTorch format with parameters only (not needed for verification)
+* `data.pt`: Raw data with instances (not needed for verification)
+
+The format of our benchmarks follows [VNN-COMP](https://sites.google.com/view/vnn2024) and [their benchmarks](https://github.com/ChristopherBrix/vnncomp2024_benchmarks). 
 
 ## Basic Usage
-We provide a script to quickly count the results in the results.csv files, including metrics such as `clean_instance_verified_ratio`, `clean_instance_falsified_ratio`, `unverifiable_instance_verified_ratio`, and `unverifiable_instance_falsified_ratio`. It supports any csv file that complies with the VNNCOMP format ([example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/never2/results.csv)).
 
+You may run your verifier on our benchmark to produce a `results.csv` file containing the results.
+The format of this CSV file should follow [the format in VNN-COMP](https://github.com/ChristopherBrix/vnncomp2024_benchmarks/blob/main/run_single_instance.sh#L104), where each line contains the result on one instance. 
+This CSV file can be automatically produced if you use the [official script](https://github.com/ChristopherBrix/vnncomp2024_benchmarks/blob/main/run_all_categories.sh) from VNN-COMP to run your verifier, with [three scripts provided by the verifier](https://github.com/stanleybak/vnncomp2021?tab=readme-ov-file#scripts).
+See an [example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/alpha_beta_crown/2024_lsnc/results.csv) of the result file.
+
+We provide an evaluation script to quickly count the results in a results CSV file.
+Our script would report metrics including:
+* `clean_instance_verified_ratio`
+* `clean_instance_falsified_ratio`
+* `unverifiable_instance_verified_ratio`
+* `unverifiable_instance_falsified_ratio` 
+
+A non-zero value for `unverifiable_instance_verified_ratio` indicates unsound results by the verifier. 
+
+Run the evaluation script by:
 ```bash
-python eval.py <path to results.csv> <path to output.csv>
+python eval.py <path to results.csv> <path to metrics.csv>
 ```
 
 ## Run Existing Verifiers on *SoundnessBench*
 
-Our experiments are all based on managing environments with conda, so make sure you have conda installed before starting.
+In this section, we provide steps for running several verifiers included in our paper. 
+Our experiments require `conda` (e.g., [miniconda](https://docs.anaconda.com/miniconda/)).
 
----
+### Step 1: Install Verifiers
 
-### Step 1: Install Verification Tools
-
-For verification with NeuralSAT and Marabou on certain networks, you will need to use [Gurobi](https://www.gurobi.com/). 
-
-Please ensure that the Gurobi license is placed in the home directory of these two tools. You can obtain a free academic Gurobi license [here](https://portal.gurobi.com/iam/login/?target=https%3A%2F%2Fportal.gurobi.com%2Fiam%2Flicenses%2Frequest%2F%3Ftype%3Dacademic).
+For verification with NeuralSAT and Marabou on certain networks, [Gurobi](https://www.gurobi.com/) is needed, and please obtain a license. You may be able to obtain a [free academic license](https://portal.gurobi.com/iam/login/?target=https%3A%2F%2Fportal.gurobi.com%2Fiam%2Flicenses%2Frequest%2F%3Ftype%3Dacademic).
 
 You can install **alpha-beta-CROWN**, **NeuralSAT**, and **PyRAT** using the following command:
 ```bash
 bash install.sh
 ```
 
-Running **Marabou** is a bit more complex. Our experiments use **Docker** to install Marabou. Please set up the Docker environment and mount [marabou_vnncomp_2023](https://github.com/wu-haoze/Marabou/tree/vnn-comp-23) or [marabou_vnncomp_2024](https://github.com/wu-haoze/Marabou/tree/vnn-comp-24) in your container. Once you have everything set up, run the following script to install Marabou:
+Running **Marabou** is a bit more complex. Our experiments use **Docker** to install Marabou. 
+Please set up a Docker environment and mount [marabou_vnncomp_2023](https://github.com/wu-haoze/Marabou/tree/vnn-comp-23) or [marabou_vnncomp_2024](https://github.com/wu-haoze/Marabou/tree/vnn-comp-24) in your container. After that, run the following to install Marabou:
 
 ```bash
 conda create -y --name marabou python=3.8
@@ -55,8 +71,6 @@ cd ~/marabou/vnncomp
 bash install_tool.sh
 cp -r ~/marabou/opt ~/
 ```
-
----
 
 ### Step 2: Run Verification
 
@@ -106,21 +120,23 @@ python run_all_verification.py --verifier marabou --model_folder <path_to_soundn
 ```
 
 ### Step 3: Count results in results.csv
+
 The `run_all_verification.py` script generates `<toolname>_results.csv` files in the `./results` directory. You can use the `eval.py` script to count the results in these files.
 
 ```bash
-python eval.py <path to results.csv> <path to output.csv>
+python eval.py <path to results.csv> <path to metrics.csv>
 ```
 
 ## Train New Models
+
 We provide an easy pipeline for users to train new models that contain hidden adversarial examples.
 
 ### File Usage Overview
+
 * `synthetic_data_generation.py` generates synthetic data with pre-defined hidden counterexamples
 * `adv_training.py` trains models on the synthetically generated dataset using a two-objective training framework
 * `cross_attack_evaluation.py` uses very strong adversarial attacks to make sure that no trivial counterexamples can be found and saves those instances into VNNLIB files
 * `models` contain the definitions of all NN architectures we use in SoundnessBench
-<!-- * `run_all_verification.py` provides an easy way to run verification on SoundnessBench for four verifiers: alpha-beta-CROWN, Marabou, NerualSAT, and PyRat, results will be saved in `results` folder. -->
 
 ### Install Dependencies
 TODO
@@ -145,7 +161,6 @@ python adv_training.py
                        --batch_size {512, BATCH_SIZE}
                        --epochs {5000, EPOCHS}
                        --lr-max {1e-3, LR-MAX}
-                       --lr-type {cyclic, decay, flat}
                        --seed {0, SEED}
 
                        # ADDITIONAL TECHNIQUES OPTIONS
@@ -156,13 +171,13 @@ python adv_training.py
 ```
 
 Below are some example commands:
+
 ```bash
 # Example training command for a MLP model
 python adv_training.py --fname model --model synthetic_mlp_default --dataset synthetic1d --synthetic_size 10 --input_size 5 --epsilon 0.02 --epochs 5000 --lr-max 1e-3 --alpha 0.02 --margin_obj --window_size 300
 
 # Example training command for a CNN model
 python adv_training.py --fname model --model synthetic_cnn_default --dataset synthetic2d --synthetic_size 10 --input_size 5 --epsilon 0.05 --epochs 5000 --lr-max 1e-3 --alpha 0.0005 --margin_obj --window_size 300
-
 ```
 
 After the training has completed, run the following command to evaluate the trained model to see if the counterexamples are truly hidden and generate onnx model and VNNLIB files. The parameters should be consistent with the parameters during training to avoid errors.
@@ -179,13 +194,13 @@ python cross_attack_evalution.py --fname FNAME # filename of your trained model
 ```
 
 Below are some example commands:
+
 ```bash
 # For the previously trained MLP model:
 python cross_attack_evaluation.py --fname model --model synthetic_mlp_default --dataset synthetic1d --epsilon 0.02 --pgd --result_path verification/model
 
 # For the previously trained CNN model:
 python cross_attack_evaluation.py --fname model --model synthetic_cnn_default --dataset synthetic2d --epsilon 0.02 --pgd --result_path verification/model
-
 ```
 
 ## Citation
