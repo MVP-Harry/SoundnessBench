@@ -13,9 +13,19 @@ SoundnessBench is hosted on [HuggingFace](https://huggingface.co/datasets/Soundn
 git clone https://huggingface.co/datasets/SoundnessBench/SoundnessBench
 ```
 
-The downloaded benchmark should contain a total of 26 models across 9 distinct NN architectures with different input sizes and perturbation radii.
+The downloaded benchmark should contain a total of 26 models across 9 distinct NN architectures with different input sizes and perturbation radii. The table below shows the 9 architectures.
 
-![Model architectures](/assets/model_architectures.png)
+| Name       | Model Architecture                                    | Activation Function |
+| ---------- | ---------------------------------------------------- | -------------------- |
+| CNN 1 Conv  | Conv 10 × 3 × 3, FC 1000, FC 100, FC 20, FC 2     | ReLU                 |
+| CNN 2 Conv  | Conv 5 × 3 × 3, Conv 10 × 3 × 3, FC 1000, FC 100, FC 20, FC 2 | ReLU |
+| CNN 3 Conv  | Conv 5 × 3 × 3, Conv 10 × 3 × 3, Conv 20 × 3 × 3, FC 1000, FC 100, FC 20, FC 2 | ReLU |
+| CNN AvgPool | Conv 10 × 3 × 3, AvgPool 3 × 3, FC 1000, FC 100, FC 20, FC 2 | ReLU |
+| MLP 4 Hidden| FC 100, FC 1000, FC 1000, FC 1000, FC 20, FC 2 | ReLU |
+| MLP 5 Hidden| FC 100, FC 1000, FC 1000, FC 1000, FC 1000, FC 20, FC 2 | ReLU |
+| CNN Tanh    | Conv 10 × 3 × 3, FC 1000, FC 100, FC 20, FC 2     | Tanh                 |
+| CNN Sigmoid    | Conv 10 × 3 × 3, FC 1000, FC 100, FC 20, FC 2     | Sigmoid                 |
+| VIT        | Modified VIT [17] with patch size 1 × 1, 2 attention heads and embedding size 16 | ReLU |
 
 Each folder should contain:
 * `model.onnx`: Model in ONNX format with both model architecture and parameters
@@ -139,7 +149,11 @@ We provide an easy pipeline for users to train new models that contain hidden ad
 * `models` contain the definitions of all NN architectures we use in SoundnessBench
 
 ### Install Dependencies
-TODO
+```
+conda create -n "SoundnessBench" python=3.11
+conda activate SoundnessBench
+pip install -r requirements.txt
+```
 
 ### Detailed Walkthrough
 To train a new model, you can run the following command, which will first call `synthetic_data_generation.py` to generate the synthetic dataset used for training, and then apply a two-objective training framework (see our paper for details) to the model.
