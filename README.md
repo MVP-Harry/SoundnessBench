@@ -5,7 +5,7 @@
 
 This repository contains the source code of SoundnessBench, a benchmark designed to thoroughly evaluate the soundness of neural network (NN) verifiers. It addresses the critical lack of ground-truth labels in previous benchmarks for NN verifiers by providing numerous unverifiable instances with hidden counterexamples, so that it can effectively reveal internal bugs of NN verifiers if they falsely claim verifiability on those unverifiable instances. SoundnessBench aims to support developers in evaluating and improving NN verifiers. See our paper for more details.
 
-LINK TO PAPER
+[[Paper] Testing Neural Network Verifiers: A Soundness Benchmark with Hidden Counterexamples](https://arxiv.org/abs/2412.03154)
 
 ## Download SoundnessBench
 SoundnessBench is hosted on [HuggingFace](https://huggingface.co/datasets/SoundnessBench/SoundnessBench). To directly download the benchmark, use
@@ -220,7 +220,19 @@ python cross_attack_evaluation.py --fname model --model synthetic_cnn_default --
 ```
 
 ## Citation
-CITATION
+Please kindly cite our paper if find SoundnessBench helpful.
+
+```
+@misc{zhou2024testingneuralnetworkverifiers,
+      title={Testing Neural Network Verifiers: A Soundness Benchmark with Hidden Counterexamples}, 
+      author={Xingjian Zhou and Hongji Xu and Andy Xu and Zhouxing Shi and Cho-Jui Hsieh and Huan Zhang},
+      year={2024},
+      eprint={2412.03154},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2412.03154}, 
+}
+```
 
 ## Contact
 
