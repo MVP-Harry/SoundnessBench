@@ -10,6 +10,7 @@ def get_args():
     global args
     parser = argparse.ArgumentParser()
     parser.add_argument("--verifier", required=True, nargs='+', type=str)
+    parser.add_argument("--config_dir", default="./config.yaml", type=str)
     parser.add_argument("--model_dir", default=None, type=str)
     parser.add_argument(
         "--tools",
@@ -70,7 +71,8 @@ def build_command(base_cmd, **kwargs):
 
 def run_verifier(
     verifier: str,
-    config_path: str,
+    bench_dir: str,
+    config_dir=None,
     timeout: int = None,
     drop_rate: float = None,
     perturb_alpha: float = None,
@@ -81,9 +83,9 @@ def run_verifier(
     container_name: str = None,
     split_type: str = "hidden",
 ):
-    config_path = Path(config_path).resolve()
+    bench_dir = Path(bench_dir).resolve()
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    config_basename = config_path.name
+    config_basename = bench_dir.name
     result_csv_dir = Path("results")
     result_csv_dir.mkdir(parents=True, exist_ok=True)
     log_dir = Path("log")
@@ -92,7 +94,7 @@ def run_verifier(
     log_file = log_dir / log_file_basename
  
     with log_file.open("a") as lf:
-        lf.write(f"run {verifier} in {config_path}\n\n")
+        lf.write(f"run {verifier} in {bench_dir}\n\n")
 
     try:
         if verifier == "abcrown":
@@ -107,18 +109,19 @@ def run_verifier(
 
             original_dir = Path.cwd()
             env = os.environ.copy()
-            print(str(config_path))
-            env["CONFIG_PATH"] = str(config_path)
+            print(str(bench_dir))
+            env["bench_dir"] = str(bench_dir)
             env_name = "alpha-beta-crown"
             target_dir = Path(
                 "alpha-beta-CROWN_vnncomp2024/complete_verifier"
             ).resolve()
             os.chdir(target_dir)
             
-            instances_file = config_path / "instances.csv"
+            instances_file = bench_dir / "instances.csv"
             with instances_file.open("r") as f:
                 reader = csv.reader(f)
                 instances = [row for row in reader]
+            print(str(Path(config_dir)))
             for i, (model_path, property_path, _) in enumerate(instances):
                 base_cmd = [
                     "conda",
@@ -130,7 +133,11 @@ def run_verifier(
                     "python",
                     "abcrown.py",
                     "--config",
-                    str(config_path / "config.yaml"),
+                    str(Path(config_dir).resolve()),
+                    "--root_path",
+                    str(bench_dir),
+                    "--onnx_path",
+                    str(bench_dir / "model.onnx"),
                     "--start",
                     str(i),
                     "--end",
@@ -200,8 +207,8 @@ def run_verifier(
 
         elif verifier == "neuralsat":
             env_name = "neuralsat"
-            model_path = config_path / "model.onnx"
-            instances_file = config_path / "instances.csv"
+            model_path = bench_dir / "model.onnx"
+            instances_file = bench_dir / "instances.csv"
             if split_type == "hidden":
                 trans_type = "activation"
             else:
@@ -221,7 +228,7 @@ def run_verifier(
                 instances = [row for row in reader]
 
             for _, property_path, _ in instances:
-                property_full_path = config_path / property_path
+                property_full_path = bench_dir / property_path
                 base_cmd = [
                     "conda",
                     "run",
@@ -279,8 +286,8 @@ def run_verifier(
 
         elif verifier == "pyrat":
             env_name = "pyrat"
-            model_path = config_path / "model.onnx"
-            instances_file = config_path / "instances.csv"
+            model_path = bench_dir / "model.onnx"
+            instances_file = bench_dir / "instances.csv"
 
             results_csv = Path(result_csv_dir / f"{verifier}_results.csv")
             if not results_csv.exists():
@@ -296,7 +303,7 @@ def run_verifier(
                 instances = [row for row in reader]
 
             for _, property_path, _ in instances:
-                property_full_path = config_path / property_path
+                property_full_path = bench_dir / property_path
                 base_cmd = [
                     "conda",
                     "run",
@@ -365,8 +372,8 @@ def run_verifier(
                     writer.writerow(["SoundnessBench", os.path.abspath(model_path), os.path.abspath(property_path), time, current_result, time])
 
         elif verifier == "marabou":
-            model_path = config_path / "model.onnx"
-            instances_file = config_path / "instances.csv"
+            model_path = bench_dir / "model.onnx"
+            instances_file = bench_dir / "instances.csv"
 
             results_csv = Path(result_csv_dir / f"{verifier}_{container_name}_results.csv")
             if not results_csv.exists():
@@ -396,7 +403,7 @@ def run_verifier(
                 exit()
             print("docker is running")
             for _, property_path, _ in instances:
-                property_full_path = Path(config_path) / property_path
+                property_full_path = Path(bench_dir) / property_path
                 output_path = "out.csv"
 
                 container_model_path = f"/host_dir/{model_path.relative_to(Path.cwd())}"
@@ -473,7 +480,8 @@ def main():
         if args.model_dir is not None:
             run_verifier(
                 verifier=verifier,
-                config_path=args.model_dir,
+                config_dir=Path(args.config_dir).resolve(),
+                bench_dir=args.model_dir,
                 timeout=args.timeout,
                 drop_rate=args.drop_rate,
                 perturb_alpha=args.perturb_alpha,
@@ -490,7 +498,8 @@ def main():
                 if os.path.isdir(subdir_path):
                     run_verifier(
                         verifier=verifier,
-                        config_path=subdir_path,
+                        config_dir=Path(args.config_dir).resolve(),
+                        bench_dir=subdir_path,
                         timeout=args.timeout,
                         drop_rate=args.drop_rate,
                         perturb_alpha=args.perturb_alpha,
