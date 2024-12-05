@@ -86,10 +86,12 @@ cp -r ~/marabou/opt ~/
 
 #### 2.1: Run alpha-beta-CROWN
 
+We provide the config file used in our experiments for alpha-beta-crown [here](./config.yaml).
+
 To run **alpha-beta-CROWN** with activation split:
 
 ```bash
-python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench>
+python run_all_verification.py --verifier abcrown --model_folder <path_to_soundness_bench> --config_dir <path_to_config_file>
 ```
 
 To run **alpha-beta-CROWN** with input split:
