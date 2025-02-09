@@ -3,7 +3,7 @@
 
 ## Overview
 
-This repository contains the source code of SoundnessBench, a benchmark designed to thoroughly evaluate the soundness of neural network (NN) verifiers. It addresses the critical lack of ground-truth labels in previous benchmarks for NN verifiers by providing numerous unverifiable instances with hidden counterexamples, so that it can effectively reveal internal bugs of NN verifiers if they falsely claim verifiability on those unverifiable instances. SoundnessBench aims to support developers in evaluating and improving NN verifiers. See our paper for more details.
+This repository contains the source code of SoundnessBench, a benchmark designed to thoroughly evaluate the soundness of neural network (NN) verifiers. It addresses the critical lack of ground-truth labels in previous benchmarks for NN verifiers by providing numerous unverifiable instances with hidden counterexamples, enabling it to effectively reveal internal bugs in NN verifiers that falsely claim verifiability on those instances. SoundnessBench aims to support developers in evaluating and improving NN verifiers. See our paper for more details.
 
 [[Paper] Testing Neural Network Verifiers: A Soundness Benchmark with Hidden Counterexamples](https://arxiv.org/abs/2412.03154)
 
@@ -44,7 +44,7 @@ This CSV file can be automatically produced if you use the [official script](htt
 See an [example](https://github.com/ChristopherBrix/vnncomp2024_results/blob/main/alpha_beta_crown/2024_lsnc/results.csv) of the result file.
 
 We provide an evaluation script to quickly count the results in a results CSV file.
-Our script would report metrics including:
+Our script reports the following metrics:
 * `clean_instance_verified_ratio`
 * `clean_instance_falsified_ratio`
 * `unverifiable_instance_verified_ratio`
@@ -199,7 +199,7 @@ python adv_training.py --fname model --model synthetic_cnn_default --dataset syn
 After the training has completed, run the following command to evaluate the trained model to see if the counterexamples are truly hidden and generate onnx model and VNNLIB files. The parameters should be consistent with the parameters during training to avoid errors.
 
 ```bash
-python cross_attack_evalution.py --fname FNAME # filename of your trained model
+python cross_attack_evaluation.py --fname FNAME # filename of your trained model
                                  --model MODEL # model architecture
                                  --dataset {synthetic1d, synthetic2d}
                                  --data_range DATA_RANGE # data range previously used
@@ -220,7 +220,7 @@ python cross_attack_evaluation.py --fname model --model synthetic_cnn_default --
 ```
 
 ## Citation
-Please kindly cite our paper if find SoundnessBench helpful.
+Please kindly cite our paper if you find SoundnessBench helpful.
 
 ```
 @misc{zhou2024testingneuralnetworkverifiers,
