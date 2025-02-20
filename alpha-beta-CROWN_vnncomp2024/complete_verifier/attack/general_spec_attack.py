@@ -592,6 +592,44 @@ def OSI_init(model, X, y, eps, alpha, num_classes, iter_steps=50, lower_limit=0.
 
     return X_init
 
+def clamp_by_pnorm(x, p, r, start_dim=None):
+    if start_dim is None:
+        start_dim = x.dim() - 3
+
+    batch_shape = x.shape[:start_dim]
+    data = x.view(*batch_shape, -1)  # data.shape: [*batch_shape, N]
+    
+    # _get_norm_batch
+    norm = data.abs().pow(p).sum(dim=-1).pow(1. / p)
+    
+    # r is l2 eps
+    if isinstance(r, torch.Tensor):
+        assert norm.size() == r.size()
+    else:
+        assert isinstance(r, float)
+    
+    factor = torch.min(r / norm, torch.ones_like(norm))
+    factor = factor.view(*batch_shape, *([1] * (x.dim() - start_dim)))
+    
+    return x * factor
+
+def normalize_by_pnorm(x, p, start_dim=None, small_constant=1e-6):
+    if start_dim is None:
+        start_dim = x.dim() - 3
+
+    batch_shape = x.shape[:start_dim]
+    data = x.view(*batch_shape, -1) # data.shape: [*batch_shape, N]
+
+    norm = data.abs().pow(p).sum(dim=-1).pow(1. / p)
+    
+    norm = torch.max(norm, torch.ones_like(norm) * small_constant)
+    
+    expand_shape = list(batch_shape) + [1] * (x.dim() - start_dim)
+    norm = norm.view(*expand_shape)
+    
+    return x / norm
+
+
 def pgd_attack_with_general_specs(model, X, data_min, data_max, C_mat, rhs_mat,
                                   cond_mat, same_number_const, alpha,
                                   use_adam=True, normalize=lambda x: x,
@@ -622,6 +660,8 @@ def pgd_attack_with_general_specs(model, X, data_min, data_max, C_mat, rhs_mat,
         alpha (float): alpha for pgd attack
     '''
     device = X.device
+    # L2 attack
+    attack_type = arguments.Config["attack"]["pgd_attack_type"] if "pgd_attack_type" in arguments.Config["attack"] else "inf"
     attack_iters = arguments.Config["attack"]["pgd_steps"] if pgd_steps is None else pgd_steps
     num_restarts = arguments.Config["attack"]["pgd_restarts"] if num_restarts is None else num_restarts
 
@@ -763,7 +803,17 @@ def pgd_attack_with_general_specs(model, X, data_min, data_max, C_mat, rhs_mat,
                      upper_limit=delta_upper_limit, sign=1)
             opt.zero_grad(set_to_none=True)
             scheduler.step()
+        elif attack_type == "l2":
+            # L2 attack
+            grad = delta.grad
+            grad_normalized = normalize_by_pnorm(grad, 2)
+            d = delta + alpha * grad_normalized
+            d = clamp(X + d, data_min, data_max) - X
+            eps = arguments.Config["attack"]["pgd_eps"]
+            d = clamp_by_pnorm(d, 2, eps)
+            delta = d.detach().requires_grad_()
         else:
+            # Linf attack
             d = delta + alpha * torch.sign(delta.grad)
             d = torch.max(torch.min(d, delta_upper_limit), delta_lower_limit)
             delta = d.detach().requires_grad_()

@@ -904,6 +904,13 @@ class ConfigHandler:
         self.add_argument('--pgd_batch_size', type=int, default=int(1e8),
                           help='Batch size for number of restarts in PGD.',
                           hierarchy=h + ["pgd_batch_size"])
+        self.add_argument('--pgd_attack_type', type=str, default="l2",
+                          help='Attack type for PGD attack.',
+                          choices=['l2', 'linf'],
+                          hierarchy=h + ["pgd_attack_type"])
+        self.add_argument('--pgd_eps', type=float, default=0.01,
+                          help='Epsilon for PGD attack.',
+                          hierarchy=h + ["pgd_eps"])
         self.add_argument('--no_pgd_early_stop', action='store_false',
                           dest='pgd_early_stop',
                           help="Enable/disable early stop PGD when an adversarial example is found.",
