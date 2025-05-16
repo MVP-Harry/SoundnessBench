@@ -1,0 +1,37 @@
+model:
+  name: mnist_cnn_4layer
+  path: models/sdp/mnist_cnn_a_adv.model
+data:
+  dataset: MNIST_SDP
+specification:
+  epsilon: 0.3
+attack:
+  pgd_order: middle
+  pgd_restarts: 50
+solver:
+  batch_size: 4096 # 1024
+  beta-crown:
+    iteration: 20 # 20
+    lr_beta: 0.005 # 0.05
+bab:
+  timeout: 200 # 180
+  tree_traversal: breadth_first
+  branching:
+    reduceop: max
+  cut:
+    enabled: True
+    cplex_cuts: False
+    bab_cut: True
+    lr: 0.02
+    lr_decay: 0.98
+    number_cuts: 200
+    biccos:
+      enabled: True
+      max_infer_iter: 20
+      constraint_strengthening: True
+      recursively_strengthening: True
+      multi_tree_branching:
+        enabled: True
+        keep_n_best_domains: 1
+        k_splits: 200
+        iterations: 1

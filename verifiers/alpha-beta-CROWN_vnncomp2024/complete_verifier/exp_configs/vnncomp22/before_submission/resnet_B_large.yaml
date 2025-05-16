@@ -1,0 +1,22 @@
+# 5X number of instances (360 instances, seed=1)
+general:
+  root_path: ../../vnncomp2022/benchmarks/ResNet_B_large
+  csv_name: instances.csv
+model:
+  onnx_quirks: "{'Reshape': {'fix_batch_size': True}}"
+data:
+  dataset: CIFAR
+solver:
+  batch_size: 4096
+  beta-crown:
+    lr_beta: 0.05
+    iteration: 10
+bab:
+  initial_max_domains: 500000
+  branching:
+    method: kfsb-intercept-only
+    reduceop: max
+    candidates: 10
+  interm_transfer: False
+attack:
+  pgd_order: middle

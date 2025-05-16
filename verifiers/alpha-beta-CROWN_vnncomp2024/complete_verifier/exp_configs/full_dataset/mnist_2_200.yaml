@@ -1,0 +1,20 @@
+model:
+  name: mnist_fc_2_200
+  path: models/toy/mnist_2_200.pth
+data:
+  dataset: MNIST
+  start: 0
+  end: 10000
+specification:
+  epsilon: 0.15
+attack:
+  pgd_restarts: 100
+solver:
+  batch_size: 2048
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 300
+  max_domains: 5000000
+  branching:
+    reduceop: max

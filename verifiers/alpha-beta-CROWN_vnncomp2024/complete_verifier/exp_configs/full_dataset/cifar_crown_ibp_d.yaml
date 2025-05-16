@@ -1,0 +1,17 @@
+model:
+  name: partial(crown_ibp_model_c_d_e_f, in_ch=3, in_dim=32, kernel_size=3, width=2, linear_size=128)
+  path: models/crown-ibp/cifar_model_d_2px.pth  # clean acc is 5324.
+data:
+  dataset: CIFAR
+  std: [0.2023, 0.1994, 0.2010]
+  mean: [0.4914, 0.4822, 0.4465]
+specification:
+  epsilon: 0.00784313725  # 2./255.
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 3840
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 600

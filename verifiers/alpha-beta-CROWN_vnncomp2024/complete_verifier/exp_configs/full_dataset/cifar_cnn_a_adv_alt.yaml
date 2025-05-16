@@ -1,0 +1,19 @@
+model:
+  name: cnn_4layer_adv
+  path: models/sdp/cifar_cnn_a_adv_alt.model  # clean acc is 6873. This is the model reported on Table C.3 in (Dathathri et al.).
+data:
+  dataset: CIFAR
+  std: [0.2471, 0.2435, 0.2616]
+  mean: [0.4914, 0.4824, 0.4467]
+specification:
+  epsilon: 0.00784313725  # 2./255.
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 3840
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 600
+  branching:
+    reduceop: max

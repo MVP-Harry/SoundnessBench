@@ -1,0 +1,26 @@
+# python robustness_verifier.py --load cifar_small_2px.pth --model cifar_model_wide --data CIFAR_RESNET --timeout 600 --epsilon 0.00784313725490196 --mode verified-acc --iteration 100 --lr_decay 0.99 --branching_method kfsb --start 7456 --end 7457 --get_upper_bound --candidates_number 16 --split_depth 8 --batch_size 4096 --beam_dive --mip_multi_proc 32 --mip_dive_timeout 360 --max_dive_fix_ratio 0.7 --min_local_free_ratio 0.3
+model:
+  name: cifar_model_wide
+  path: models/bab_attack/cifar_small_2px.pth
+data:
+  dataset: CIFAR  # Dataset name. This is just the standard CIFAR-10 test set defined in the "load_verification_dataset()" function in utils.py
+  mean: [0.485, 0.456, 0.406]
+  std: [0.225, 0.225, 0.225]
+specification:
+  norm: .inf  # Linf norm (can also be 2 or 1).
+  epsilon: 0.00784313725  # 2./255.
+attack:  # Currently attack is only implemented for Linf norm.
+  pgd_restarts: 50  # Increase for a stronger attack.
+solver:
+  batch_size: 2048
+  beta-crown:
+    iteration: 50
+  mip:
+    solver_threads: 8
+    parallel_solvers: 1
+bab:
+  timeout: 600
+  branching:
+    reduceop: min
+    method: fsb
+    candidates: 1

@@ -1,0 +1,28 @@
+general:
+  root_path: ../../vnncomp2021/benchmarks/cifar10_resnet  # Please update this path to point to the VNN-COMP 2021 repo.
+  csv_name: cifar10_resnet_instances.csv
+data:
+  dataset: CIFAR
+  start: 0
+  end: 72
+solver:
+  batch_size: 2000
+  beta-crown:
+    lr_beta: 0.01
+attack:
+  pgd_order: middle
+bab:
+  branching:
+    reduceop: max
+  cut:
+    enabled: True
+    cplex_cuts: False
+    bab_cut: True
+    number_cuts: 300
+    biccos:
+      enabled: True
+      max_infer_iter: 20
+      constraint_strengthening: True
+      recursively_strengthening: True
+      multi_tree_branching:
+        enabled: False

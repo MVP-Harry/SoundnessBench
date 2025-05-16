@@ -1,0 +1,20 @@
+model:
+  name: Customized("vnncomp_resnet", "resnet_p12", num_classes=200, bn=False)
+  path: models/vnncomp22/tinyimagenet/ImageNet_resnet9b+++_0.05_0.95_fusion.pt
+data:
+  dataset: Customized("vnncomp_resnet", "load_sampled_tinyimagenet", seed=111, size=10000)
+  mean: [0.4802, 0.4481, 0.3975]
+  std: [0.2302, 0.2265, 0.2262]
+  num_outputs: 200
+specification:
+  epsilon: 0.00392156862  # 1./255.
+attack:
+  pgd_restarts: 10
+solver:
+  batch_size: 256
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 300
+  branching:
+    reduceop: max

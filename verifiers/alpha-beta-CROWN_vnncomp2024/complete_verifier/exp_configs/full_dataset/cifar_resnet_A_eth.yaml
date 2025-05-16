@@ -1,0 +1,22 @@
+
+model:
+  name: resnet3b2
+  path: ../../mn-bab/networks/resnet_3b2_bn_mixup_adv_4.0_bs128_lr-1_new.pth
+data:
+  dataset: CIFAR
+  std: [0.2023, 0.1994, 0.2010]
+  mean: [0.4914, 0.4822, 0.4465]
+  start: 0
+  end: 100  # acc should be 83/100
+specification:
+  epsilon: 0.0035
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 1600
+  beta-crown:
+    iteration: 40
+bab:
+  timeout: 300
+  branching:
+    reduceop: max

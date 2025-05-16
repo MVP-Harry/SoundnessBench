@@ -1,0 +1,25 @@
+model:
+  name: mnist_conv_small
+  path: models/eran/mnist_conv_small_nat.pth
+data:
+  dataset: MNIST
+  mean: [0.1307]
+  std: [0.3081]
+  start: 0
+  end: 10000
+specification:
+  epsilon: 0.12
+attack:
+  pgd_restarts: 100
+solver:
+  batch_size: 2048
+  beta-crown:
+    iteration: 20
+  mip:
+    parallel_solvers: 2
+    solver_threads: 16
+bab:
+  timeout: 300
+  max_domains: 5000000
+  branching:
+    reduceop: max

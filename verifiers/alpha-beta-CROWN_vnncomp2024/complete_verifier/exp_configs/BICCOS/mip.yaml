@@ -1,0 +1,18 @@
+general:
+  complete_verifier: mip
+  #root_path: ../../vnncomp2022_benchmarks/benchmarks/oval21  # Please update this path to point to the VNN-COMP 2022 repo
+  #csv_name: instances.csv
+  #conv_mode: matrix
+model:
+  # if change the model, please also change the model path
+  # when you want to do the sanity check
+  name: cnn_4layer
+  path: models/sdp/cifar_cnn_a_mix.model
+data:
+  dataset: CIFAR_SDP
+specification:
+  epsilon: 0.00784313725  # 2./255.
+attack:
+  pgd_order: before
+bab:
+  timeout: 200

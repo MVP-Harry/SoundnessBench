@@ -1,0 +1,25 @@
+model:
+  name: cifar_model_deep
+  path: models/oval/cifar_deep.pth
+data:
+  dataset: CIFAR
+  std: [0.225, 0.225, 0.225]
+  mean: [0.485, 0.456, 0.406]
+attack:
+  pgd_restarts: 100
+specification:
+  epsilon: 0.00784313725490196  # 2/255.
+solver:
+  batch_size: 1024
+  beta-crown:
+    iteration: 20
+  mip:
+    parallel_solvers: 2
+    solver_threads: 16
+bab:
+  timeout: 300
+  max_domains: 5000000
+  branching:
+    method: fsb
+    reduceop: min
+    candidates: 1
