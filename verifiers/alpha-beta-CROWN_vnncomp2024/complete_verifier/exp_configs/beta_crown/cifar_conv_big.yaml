@@ -1,0 +1,15 @@
+model:
+  name: cifar_conv_big
+  path: models/eran/cifar_conv_big_pgd.pth
+data:
+  dataset: CIFAR_ERAN
+specification:
+  epsilon: 0.00784313725  # 2./255.
+attack:
+  pgd_restarts: 100
+solver:
+  batch_size: 64
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 180

@@ -1,0 +1,30 @@
+general:
+  root_path: ${CONFIG_PATH}
+  complete_verifier: bab # skip, bab
+  save_adv_example: true
+model:
+  onnx_path: ${CONFIG_PATH}/model.onnx
+solver:
+  min_batch_size_ratio: 0.0
+  auto_enlarge_batch_size: True
+  batch_size: 16
+  start_save_best: -1
+  bound_prop_method: alpha-crown
+  beta-crown:
+    lr_alpha: 0.1
+    lr_beta: 0.2
+    iteration: 10
+  alpha-crown:
+    lr_alpha: 0.25
+    iteration: 20
+    full_conv_alpha: False
+bab:
+  initial_max_domains: 2
+  interm_transfer: True
+  timeout: 100
+  branching:
+    method: kfsb # if input_split, sb; else, kfsb
+    input_split:
+      enable: False
+    candidates: 7
+    reduceop: max

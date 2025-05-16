@@ -1,0 +1,36 @@
+# Configuration file for running the sri_resnet_a benchmark (all properties).
+general:
+  root_path: ../../vnncomp2022_benchmarks/benchmarks/sri_resnet_a
+  csv_name: instances.csv
+model:
+  onnx_quirks: "{'Reshape': {'fix_batch_size': True}}"
+solver:
+  batch_size: 1024
+  beta-crown:
+    lr_beta: 0.05
+    iteration: 20
+  prune_after_crown: True
+bab:
+  branching:
+    method: kfsb
+    reduceop: max
+    candidates: 10
+  tree_traversal: breadth_first
+  interm_transfer: False
+  cut:
+    enabled: True
+    bab_cut: True
+    number_cuts: 200
+    biccos:
+      enabled: True
+      max_infer_iter: 10
+      constraint_strengthening: True
+      recursively_strengthening: True
+      multi_tree_branching:
+        enabled: True
+        keep_n_best_domains: 1
+        k_splits: 100
+        iterations: 2
+attack:
+  pgd_order: middle
+

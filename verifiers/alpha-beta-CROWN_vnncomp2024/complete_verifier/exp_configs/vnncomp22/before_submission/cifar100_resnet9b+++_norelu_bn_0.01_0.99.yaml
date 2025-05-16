@@ -1,0 +1,20 @@
+model:
+  name: Customized("vnncomp_resnet", "resnet_v12", num_classes=100, bn=True)
+  path: models/vnncomp22/cifar100/resnet9b+++_0.01_0.99_ori.pt
+data:
+  dataset: Customized("vnncomp_resnet", "load_sampled_cifar100", seed=111, size=10000)
+  mean: [0.5071, 0.4865, 0.4409]
+  std: [0.2673, 0.2564, 0.2761]
+  num_outputs: 100
+specification:
+  epsilon: 0.00392156862  # 1./255.
+attack:
+  pgd_restarts: 10
+solver:
+  batch_size: 256
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 300
+  branching:
+    reduceop: max

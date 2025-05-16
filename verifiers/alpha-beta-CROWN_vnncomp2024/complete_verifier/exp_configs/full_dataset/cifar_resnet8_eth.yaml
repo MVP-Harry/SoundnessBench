@@ -1,0 +1,23 @@
+# https://github.com/eth-sri/mn-bab/blob/main/configs/cifar10_resnet_3b2_bn.json
+
+model:
+  name: resnet3b2
+  path: ../../mn-bab/networks/resnet_3b2_bn_mixup_adv_4.0_bs128_lr-1.pth  # https://github.com/eth-sri/mn-bab/tree/main/networks
+data:
+  dataset: CIFAR
+  std: [0.2471, 0.2435, 0.2616]
+  mean: [0.4914, 0.4822, 0.4465]
+  start: 0
+  end: 100  # acc should be 83/100
+specification:
+  epsilon: 0.00392156862  # 1./255.
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 1600
+  beta-crown:
+    iteration: 40
+bab:
+  timeout: 600
+  branching:
+    reduceop: max

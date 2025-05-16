@@ -1,0 +1,19 @@
+model:
+  name: cifar_marabou_small
+  path: models/marabou_cifar10/cifar_marabou_small.pth  # Clean acc is 6314.
+data:
+  dataset: CIFAR
+  std: 1.0
+  mean: 0.0
+specification:
+  epsilon: 0.00784313725  # 2./255.
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 4096
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 180
+  branching:
+    reduceop: max
