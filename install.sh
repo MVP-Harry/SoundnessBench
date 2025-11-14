@@ -105,13 +105,13 @@ install_marabou_docker() {
     local name=$2
 
     echo "Setting up Docker for $name..."
-    docker build -f $MARABOU_SETUP_DIR/Dockerfile -t marabou .
+    docker build -f $MARABOU_SETUP_DIR/Dockerfile -t $name .
 
     # launch marabou docker with mounting the current directory and the marabou directory
     docker run -dit --name $name \
         -v $(pwd)/$VERIFIER_DIR/$folder:/root/marabou \
         -v $(pwd):/host_dir \
-        marabou
+        $name
 
     # create the conda environment, set up gurobi license, and install marabou
     docker exec -it $name bash -c "source ~/miniconda3/etc/profile.d/conda.sh && \
