@@ -3,7 +3,13 @@
 
 ## Overview
 
-This repository contains the source code of SoundnessBench, a benchmark designed to thoroughly evaluate the soundness of neural network (NN) verifiers. It addresses the critical lack of ground-truth labels in previous benchmarks for NN verifiers by providing numerous unverifiable instances with hidden counterexamples, enabling it to effectively reveal internal bugs in NN verifiers that falsely claim verifiability on those instances. SoundnessBench aims to support developers in evaluating and improving NN verifiers. See our paper for more details.
+This repository contains the source code of SoundnessBench, a benchmark designed to thoroughly evaluate the soundness of neural network (NN) verifiers. It addresses the critical lack of ground-truth labels in previous benchmarks for NN verifiers by providing numerous unverifiable instances with hidden counterexamples, enabling it to effectively reveal internal bugs in NN verifiers that falsely claim verifiability on those instances. SoundnessBench aims to support developers in evaluating and improving NN verifiers. 
+
+See our paper for more details:
+
+Xingjian Zhou*, Keyi Shen*, Andy Xu*, Hongji Xu*, Cho-Jui Hsieh, Huan Zhang, and Zhouxing Shi.
+[SoundnessBench: A Soundness Benchmark for Neural Network Verifiers](https://openreview.net/pdf?id=UuYYldVLH3). In TMLR (December 2025). 
+(*equal contribution)
 
 ## Download SoundnessBench
 SoundnessBench is hosted on [HuggingFace](https://huggingface.co/datasets/SoundnessBench/SoundnessBench). To directly download the benchmark, use
